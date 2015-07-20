@@ -36,15 +36,15 @@ var FibWSServer = function (config) {
     this._handshake = function (header, conn) {
         var output = [], br = '\r\n';
 
-        var key = _challenge(header[11].split(': ')[1]);
+        var key = _challenge(header['Sec-WebSocket-Key']);
 
         output.push(
             'HTTP/1.1 101 WebSocket Protocol Handshake',
             'Upgrade: WebSocket',
             'Connection: Upgrade',
             'Sec-WebSocket-Accept: ' + key,
-            'Sec-WebSocket-Origin: ' + header[6].split(': ')[1],
-            'Sec-WebSocket-Location: ws://' + header[1].split(': ')[1] + '/',
+            'Sec-WebSocket-Origin: ' + header['Origin'],
+            'Sec-WebSocket-Location: ws://' + header['Host'] + '/',
             br
         );
 
@@ -59,8 +59,19 @@ FibWSServer.prototype.run = function () {
 
         //first time request
         var headers = conn.read().toString().split('\r\n');
-        that.config.onConnection(headers);
-        if (headers[2].toLowerCase() === 'connection: upgrade') {
+        that.config.onConnection(conn, headers);
+
+        var headerObj = {};
+        headers.forEach(function(header, index){
+            if (index == 0){
+                return header.split(' ');
+            }
+            var h = header.split(': ');
+            headerObj[h[0]] = h[1];
+        });
+        headers = headerObj;
+
+        if (headers['Connection'].toLowerCase() === 'upgrade') {
 
             //协议转换
             var responsestr = that._handshake(headers, conn);

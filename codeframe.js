@@ -87,7 +87,9 @@ function encodeFrame(frame) {
     }
     preBytes = new Buffer(preBytes);
     payBytes = new Buffer(payBytes);
-    payBytes.write(preBytes);
+    var b = new Buffer();
+    b.write(preBytes);
+    b.write(payBytes);
     return payBytes;
 }
 

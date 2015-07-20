@@ -15,7 +15,7 @@ var server = new FibWSServer({
         if (data === 'close') {
             conn.close();
         }
-        FibWSServer.sendMessage(data, conn);
+        //FibWSServer.sendMessage(data, conn);
     },
     onConnection: function () {
         console.log('connection');
