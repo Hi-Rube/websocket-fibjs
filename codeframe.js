@@ -86,7 +86,10 @@ function encodeFrame(frame) {
         );
     }
     preBytes = new Buffer(preBytes);
-    return new Buffer([preBytes, payBytes]);
+    var b = new Buffer(payBytes.length + preBytes.length);
+    b.write(preBytes);
+    b.write(payBytes);
+    return b;
 }
 
 exports.decodeFrame = decodeFrame;

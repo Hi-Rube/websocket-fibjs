@@ -19,7 +19,7 @@
     var socket = new WebSocket('ws://127.0.0.1:4400/')
     socket.onopen = function(e) {
         log(e.type);
-        socket.send('hello node');
+        socket.send('hello fibjs, I\'m Rube');
     }
     socket.onclose = function(e) {
         log(e.type);
