@@ -81,14 +81,16 @@ FibWSServer.prototype.run = function () {
                 try {
                     var content = conn.read();
                 } catch (e) {
-                    return that.config.onClose();
+                    that.config.onClose();
+                    return conn.close();
                 }
                 if (content) {
                     var receiveStr = codeframe.decodeFrame(content);
                     if (receiveStr.Opcode == 8) {
-                        return that.config.onClose();
+                        that.config.onClose();
+                        return conn.close();
                     }
-                    that.config.onMessage(receiveStr.Payload_data.toString(), conn);
+                    that.config.onMessage(receiveStr.Payload_data, conn);
                 }
             }
         }
@@ -107,7 +109,7 @@ FibWSServer.sendMessage = function (message, conn) {
         FIN: 1,
         Opcode: 1,
         MASK: 0,
-        Payload_data: new Buffer(message)
+        Payload_data: message
     });
     conn.write(sendStr);
 };

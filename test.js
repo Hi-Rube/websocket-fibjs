@@ -11,7 +11,7 @@ var FibWSServer = require('./app.js');
 var server = new FibWSServer({
     port: 4400,
     onMessage: function (data, conn) {
-        console.log('----' + data);
+        //console.log('----' + data);
         FibWSServer.sendMessage(data, conn);
     },
     onConnection: function () {

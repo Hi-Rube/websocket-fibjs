@@ -19,7 +19,9 @@
     var socket = new WebSocket('ws://127.0.0.1:4400/')
     socket.onopen = function(e) {
         log(e.type);
-        socket.send('hello fibjs, I\'m Rube');
+        setInterval(function(){
+            socket.send('hello fibjs, I\'m Rube');
+        }, 1000);
     }
     socket.onclose = function(e) {
         log(e.type);
