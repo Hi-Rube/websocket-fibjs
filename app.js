@@ -44,7 +44,7 @@ var FibWSServer = function (config) {
             'Connection: Upgrade',
             'Sec-WebSocket-Accept: ' + key,
             'Sec-WebSocket-Origin: ' + header['Origin'],
-            'Sec-WebSocket-Location: ws://' + header['Host'] + '/',
+            'Sec-WebSocket-Location: ws://' + header['Host'] + header['Method'][1],
             br
         );
 
@@ -62,17 +62,17 @@ FibWSServer.prototype.run = function () {
         that.config.onConnection(conn, headers);
 
         var headerObj = {};
-        headers.forEach(function(header, index){
-            if (index == 0){
-                return header.split(' ');
+        headers.forEach(function (header, index) {
+            if (index == 0) {
+                headerObj['Method'] = header.split(' ');
             }
             var h = header.split(': ');
             headerObj[h[0]] = h[1];
         });
         headers = headerObj;
 
-        if (headers['Connection'].toLowerCase() === 'upgrade') {
-
+        if (headers['Connection'].toLowerCase().indexOf('upgrade') != -1) {
+            if (headers['Upgrade'].toLowerCase() !== 'websocket') return;
             //协议转换
             var responsestr = that._handshake(headers, conn);
             conn.write(responsestr);
@@ -81,11 +81,13 @@ FibWSServer.prototype.run = function () {
                 try {
                     var content = conn.read();
                 } catch (e) {
-                    that.config.onClose();
-                    break;
+                    return that.config.onClose();
                 }
                 if (content) {
                     var receiveStr = codeframe.decodeFrame(content);
+                    if (receiveStr.Opcode == 8) {
+                        //return that.config.onClose();
+                    }
                     that.config.onMessage(receiveStr.Payload_data.toString(), conn);
                 }
             }
@@ -95,14 +97,19 @@ FibWSServer.prototype.run = function () {
     this.server.run();
 };
 
+/**
+ * 发送数据
+ * @param message
+ * @param conn
+ */
 FibWSServer.sendMessage = function (message, conn) {
-    conn.write(codeframe.encodeFrame({
-        "FIN": 1,
-        "Opcode": 1,
-        "MASK": 1,
-        "Payload_len": 10,
-        "Payload_data": 'hello'
-    }));
+    var sendStr = codeframe.encodeFrame({
+        FIN: 1,
+        Opcode: 1,
+        MASK: 0,
+        Payload_data: new Buffer(message)
+    });
+    conn.write(sendStr);
 };
 
 module.exports = FibWSServer;
