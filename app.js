@@ -86,7 +86,7 @@ FibWSServer.prototype.run = function () {
                 if (content) {
                     var receiveStr = codeframe.decodeFrame(content);
                     if (receiveStr.Opcode == 8) {
-                        //return that.config.onClose();
+                        return that.config.onClose();
                     }
                     that.config.onMessage(receiveStr.Payload_data.toString(), conn);
                 }
